@@ -1,145 +1,77 @@
 # 🎧 Model Card: Music Recommender Simulation
 
-## 1. Model Name  
+## Model Name
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
-
----
-
-## 2. Intended Use  
-
-Describe what your recommender is designed to do and who it is for. 
-
-Prompts:  
-
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+**VibeFinder 1.0**
 
 ---
 
-## 3. How the Model Works  
+## Goal / Task
 
-Explain your scoring approach in simple language.  
-
-Prompts:  
-
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
-
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+This recommender suggests songs that match a user's music taste profile. It looks
+at each song in the CSV file and compares it to the user's favorite genre, favorite
+mood, and target energy, valence, and tempo. The goal is to rank the songs from best
+match to weakest match and show the top few.
 
 ---
 
-## 4. Data  
+## Data Used
 
-Describe the dataset the model uses.  
+- The data comes from `data/songs.csv`.
+- It is a small dataset with 18 songs.
+- Each song has features like title, artist, genre, mood, energy, valence, and tempo_bpm (plus danceability and acousticness).
+- Some features are words, like genre and mood.
+- Some features are numbers, like energy, valence, and tempo.
 
-Prompts:  
-
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
-
----
-
-## 5. Strengths  
-
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+This is enough for a simple class project, but it is not enough for a real music app.
+The dataset is small, and it does not include any real user actions like likes, skips,
+saves, or playlists.
 
 ---
 
-## 6. Limitations and Bias 
+## Algorithm Summary
 
-One limitation I found is that the system can over-prioritize genre. If a song
-matches the user's favorite genre it gets a big +2.0 boost, so a song from a
-different genre can get skipped even if its mood, energy, and tempo are a better
-match. This can create a kind of filter bubble where the user mostly gets songs
-from the one genre they already picked. My dataset is also pretty small (only 18
-songs), so a few songs keep showing up across different profiles — for example
-"Gym Hero" appeared in the top 5 of four of my five profiles because it is pop
-with very high energy. Some genres and moods are also underrepresented (there is
-only one classical song and no "sad" song at all), so the system does badly for
-users who want those. Finally, my recommender does not use any real user behavior
-like skips, likes, saves, or playlists, so it can't learn or improve over time
-like a real app would.
+The recommender gives every song a score. A song gets +2.0 points if its genre matches
+the user's favorite genre, and +1.0 point if its mood matches the user's favorite mood.
+For energy, valence, and tempo, the system gives more points when the song is close to
+the user's target values, and fewer points when it is far away. So a song with energy
+0.75 scores higher than a song with energy 0.3 when the user wants 0.8.
+
+After every song is scored, the program sorts the songs from highest score to lowest
+score and shows the top recommendations. It also prints a list of reasons for each song
+(like "genre match (+2.0)" or "energy close to target (+0.92)") so the user can see why
+each song was picked.
 
 ---
 
-## 7. Evaluation  
+## Observed Behavior / Biases
 
-### Profiles I tested and what each one was checking
+- The system can over-prioritize genre. A genre match gives a big +2.0 boost, so a song can win even if another song has a closer mood or energy match.
+- The same song can show up for many profiles. "Gym Hero" appeared in the top 5 for four of my five profiles because it is pop with very high energy.
+- The dataset is small, so there is not much variety. My "Chill Lofi" profile could only get the 3 lofi songs that exist.
+- Some genres and moods are missing or rare. There is only one classical song, and there is no "sad" song at all, so the system does badly for those tastes.
+- It can create a small filter bubble, because it mostly recommends songs that are already very similar to what the user said they like.
 
-| Profile | What it was testing |
-|---|---|
-| **High-Energy Pop** | A clear, "easy" taste where genre, mood, and numbers all point the same way. |
-| **Chill Lofi** | A low-energy, slow-tempo taste (the opposite of the pop profile). Its mood was "calm", which is NOT a mood in my data, so it tests what happens when the mood label doesn't exist. |
-| **Deep Intense Rock** | A high-energy but low-valence (darker) taste to see if it picks rock/intense songs. |
-| **Sad But High Energy** (edge case) | A tricky profile that asks for two things that usually don't go together: sad (low valence) but high energy. Tests mixed/conflicting preferences. |
-| **Genre Mismatch Test** (edge case) | Asks for "classical", a genre with only one song in my data. Tests what happens when the favorite genre barely exists. |
+---
 
-### Did the results make sense?
+## Evaluation Process
 
-Mostly yes. Pop/happy songs topped the pop profile, lofi songs topped the lofi
-profile, and Storm Runner (rock/intense) topped the rock profile. The edge cases
-behaved in ways that made sense once I looked at the scores.
+I tested the recommender with 5 different user profiles: **High-Energy Pop**,
+**Chill Lofi**, and **Deep Intense Rock** (normal tastes), plus two edge cases,
+**Sad But High Energy** and **Genre Mismatch Test**. For each profile I looked at
+the top 5 recommendations and checked if they made sense.
 
-### What surprised me
+I also ran one experiment (Option A: Weight Shift). I changed genre from +2.0 down to
++1.0 and energy from up to +1.0 up to +2.0. The #1 song for each profile stayed the
+same, but the lower ranks started favoring high-energy songs from other genres. For
+example, a rock song jumped into the "High-Energy Pop" top 5, and the one classical
+song fell out of the "Genre Mismatch Test" top 5. This showed me that small changes
+in the weights can change the rankings, and that energy became stronger while genre
+became weaker. I then set the weights back to the baseline.
 
-- **The same song kept showing up.** "Gym Hero" (pop, energy 0.93) appeared in the
-  top 5 of four different profiles, just because so many of my profiles wanted high
-  energy.
-- **Genre is powerful, but not always.** For Chill Lofi, the whole top 3 were lofi
-  songs because of the genre boost. But for Genre Mismatch Test, the only classical
-  song did NOT win — its numbers were so far off that a well-matching pop song beat
-  it. So genre is strong but can still lose.
-- **The "sad" profile couldn't really get sad songs.** Because no song in my data has
-  a "sad" mood, and the top picks were upbeat pop songs. The genre + energy + tempo
-  points beat the low-valence request.
+Here are the real terminal outputs from `python -m src.main` (baseline weights).
 
-### Comparisons between profiles
-
-- The **High-Energy Pop** profile preferred upbeat songs because it had high target
-  energy, high valence, and a pop genre preference.
-- The **Chill Lofi** profile shifted toward calmer, slower songs because it had low
-  energy and a slow target tempo — basically the opposite of the pop profile.
-- The **Deep Intense Rock** profile preferred louder, faster songs because it had
-  high energy, low valence, and a rock genre preference.
-- The **Sad But High Energy** profile was interesting because it asked for two
-  conflicting things (sad mood but high energy), which helped test whether the
-  recommender could handle mixed preferences. It ended up choosing high-energy pop
-  songs and mostly ignoring the "sad" part.
-- The **Genre Mismatch Test** profile showed that when a favorite genre barely exists,
-  the recommender falls back on mood and the numeric features instead.
-
-### My weight experiment (Option A: Weight Shift)
-
-I changed the weights so genre went from +2.0 down to +1.0, and energy went from up
-to +1.0 up to +2.0. (To reproduce: set `WEIGHT_GENRE = 1.0` and `WEIGHT_ENERGY = 2.0`
-in `src/recommender.py`.)
-
-What happened: the #1 song for each profile stayed the same, but the lower ranks
-started favoring high-energy songs from OTHER genres. In High-Energy Pop, the rock
-song "Storm Runner" climbed into the top 5. In Genre Mismatch Test, the single
-classical song fell out of the top 5 completely. So the change made the results
-**different and a bit worse for staying on-genre** — it showed that energy became
-more powerful and genre became weaker.
-
-### Terminal output for each profile
-
-These are the real outputs from `python -m src.main` (baseline weights).
-
-#### High-Energy Pop Output
+### High-Energy Pop Output
 
 ```text
 Profile: High-Energy Pop
@@ -192,7 +124,7 @@ Reasons:
 - tempo close to target (+0.50)
 ```
 
-#### Chill Lofi Output
+### Chill Lofi Output
 
 ```text
 Profile: Chill Lofi
@@ -244,7 +176,7 @@ Reasons:
 - tempo close to target (+0.83)
 ```
 
-#### Deep Intense Rock Output
+### Deep Intense Rock Output
 
 ```text
 Profile: Deep Intense Rock
@@ -296,7 +228,7 @@ Reasons:
 - tempo close to target (+0.50)
 ```
 
-#### Sad But High Energy Output
+### Sad But High Energy Output
 
 ```text
 Profile: Sad But High Energy
@@ -347,7 +279,7 @@ Reasons:
 - tempo close to target (+0.67)
 ```
 
-#### Genre Mismatch Test Output
+### Genre Mismatch Test Output
 
 ```text
 Profile: Genre Mismatch Test
@@ -401,25 +333,41 @@ Reasons:
 
 ---
 
-## 8. Future Work  
+## Intended Use
 
-Ideas for how you would improve the model next.  
-
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+This system is intended for a class project and for learning how recommendation
+systems work. It is useful for showing how song features can be compared to a user's
+preferences to make a ranked list. It is meant for classroom exploration, not for real
+users.
 
 ---
 
-## 9. Personal Reflection  
+## Non-Intended Use
 
-A few sentences about your experience.  
+- It should not be used as a real commercial music recommendation product.
+- It should not be used to judge artists or predict how popular a song will be.
+- It should not be treated as fully accurate, because it is small and simple.
+- It should not replace the real recommendation systems used by music apps.
 
-Prompts:  
+---
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+## Ideas for Improvement
+
+- Add more songs and more genres so the recommender has more variety.
+- Use real user behavior like likes, skips, saves, and playlists so it can learn over time.
+- Let the user change the weights, or make the system avoid recommending the same song too often.
+
+---
+
+## Personal Reflection
+
+My biggest learning moment was understanding that a recommender does not magically know
+what someone likes. It needs data, rules, and a way to compare each song to a user
+profile. Using AI tools helped me understand the code and write the scoring logic, and
+it explained things in simple words when I was confused. But I still had to check the
+AI's work, especially when I looked at the results to see if the top songs actually
+matched each profile, and when I made sure the weights went back to normal after my
+experiment. I was surprised that such a simple scoring system could still feel like a
+real recommendation, because the top songs usually matched the user's vibe. If I kept
+working on this project, I would add more songs and let users give feedback like likes
+and skips, so the system could get better over time instead of only using the profile.

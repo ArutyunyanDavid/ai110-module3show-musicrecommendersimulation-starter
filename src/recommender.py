@@ -6,11 +6,9 @@ import csv
 # Algorithm Recipe (weights)
 # These say how much each feature is worth. Genre matters most, then mood,
 # then the numeric "vibe" features. Change these to run experiments!
-# ---------------------------------------------------------------------------
-# These say how much each feature is worth. Genre matters most, then mood,
-# then the numeric "vibe" features.
 # EXPERIMENT NOTE (Option A - Weight Shift): to re-run my weight experiment,
 # set WEIGHT_GENRE = 1.0 and WEIGHT_ENERGY = 2.0, then run the program again.
+# ---------------------------------------------------------------------------
 WEIGHT_GENRE = 2.0
 WEIGHT_MOOD = 1.0
 WEIGHT_ENERGY = 1.0
