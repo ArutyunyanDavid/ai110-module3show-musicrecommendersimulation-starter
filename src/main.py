@@ -1,7 +1,8 @@
 """
 Command line runner for the Music Recommender Simulation.
 
-This file helps you quickly run and test your recommender.
+This file runs several user profiles so I can compare how the recommender
+behaves for different music tastes.
 
 Run it from the project root with:
     python -m src.main
@@ -10,33 +11,82 @@ Run it from the project root with:
 from src.recommender import load_songs, recommend_songs
 
 
-def main() -> None:
-    # 1) Load the songs from the CSV file.
-    songs = load_songs("data/songs.csv")
-    print(f"Loaded songs: {len(songs)}")
+# ---------------------------------------------------------------------------
+# User profiles to test.
+# The first three are "normal" tastes. The last two are tricky "edge case"
+# profiles that ask for unusual or conflicting things.
+# ---------------------------------------------------------------------------
+high_energy_pop = {
+    "name": "High-Energy Pop",
+    "favorite_genre": "pop",
+    "favorite_mood": "happy",
+    "target_energy": 0.9,
+    "target_valence": 0.9,
+    "target_tempo_bpm": 125,
+}
 
-    # 2) The user's taste profile.
-    user_prefs = {
-        "favorite_genre": "pop",
-        "favorite_mood": "happy",
-        "target_energy": 0.8,
-        "target_valence": 0.9,
-        "target_tempo_bpm": 120,
-    }
+chill_lofi = {
+    "name": "Chill Lofi",
+    "favorite_genre": "lofi",
+    "favorite_mood": "calm",
+    "target_energy": 0.3,
+    "target_valence": 0.5,
+    "target_tempo_bpm": 80,
+}
 
-    # 3) Show the profile.
-    print("\nUser Profile:")
-    print(f"Genre: {user_prefs['favorite_genre']}")
-    print(f"Mood: {user_prefs['favorite_mood']}")
-    print(f"Target Energy: {user_prefs['target_energy']}")
-    print(f"Target Valence: {user_prefs['target_valence']}")
-    print(f"Target Tempo: {user_prefs['target_tempo_bpm']} BPM")
+deep_intense_rock = {
+    "name": "Deep Intense Rock",
+    "favorite_genre": "rock",
+    "favorite_mood": "intense",
+    "target_energy": 0.9,
+    "target_valence": 0.4,
+    "target_tempo_bpm": 140,
+}
 
-    # 4) Get the top recommendations.
-    recommendations = recommend_songs(user_prefs, songs, k=5)
+# Edge case 1: asks for two things that usually don't go together
+# (sad mood is usually low energy, but this user wants high energy).
+sad_but_high_energy = {
+    "name": "Sad But High Energy",
+    "favorite_genre": "pop",
+    "favorite_mood": "sad",
+    "target_energy": 0.9,
+    "target_valence": 0.2,
+    "target_tempo_bpm": 130,
+}
 
-    # 5) Print each recommendation with its score and reasons.
-    print("\nTop Recommendations:\n")
+# Edge case 2: a genre that barely exists in our small dataset.
+genre_mismatch_test = {
+    "name": "Genre Mismatch Test",
+    "favorite_genre": "classical",
+    "favorite_mood": "happy",
+    "target_energy": 0.8,
+    "target_valence": 0.9,
+    "target_tempo_bpm": 120,
+}
+
+PROFILES = [
+    high_energy_pop,
+    chill_lofi,
+    deep_intense_rock,
+    sad_but_high_energy,
+    genre_mismatch_test,
+]
+
+
+def print_profile_results(profile: dict, songs: list) -> None:
+    """Print one profile's preferences and its top 5 recommendations."""
+    print("=" * 40)
+    print(f"Profile: {profile['name']}")
+    print("Preferences:")
+    print(f"Genre: {profile['favorite_genre']}")
+    print(f"Mood: {profile['favorite_mood']}")
+    print(f"Target Energy: {profile['target_energy']}")
+    print(f"Target Valence: {profile['target_valence']}")
+    print(f"Target Tempo: {profile['target_tempo_bpm']} BPM")
+    print()
+    print("Top 5 Recommendations:\n")
+
+    recommendations = recommend_songs(profile, songs, k=5)
     for position, rec in enumerate(recommendations, start=1):
         song = rec["song"]
         print(f"{position}. {song['title']}")
@@ -45,6 +95,14 @@ def main() -> None:
         for reason in rec["reasons"]:
             print(f"- {reason}")
         print()
+
+
+def main() -> None:
+    songs = load_songs("data/songs.csv")
+    print(f"Loaded songs: {len(songs)}\n")
+
+    for profile in PROFILES:
+        print_profile_results(profile, songs)
 
 
 if __name__ == "__main__":

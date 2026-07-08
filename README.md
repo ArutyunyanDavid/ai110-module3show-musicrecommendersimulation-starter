@@ -117,58 +117,62 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-This is the real terminal output from running `python -m src.main`:
+Running `python -m src.main` now prints the top 5 recommendations for **five
+different user profiles**. Below is the first profile as an example — the full
+output for all five profiles is in [model_card.md](model_card.md).
 
 ```text
 Loaded songs: 18
 
-User Profile:
+========================================
+Profile: High-Energy Pop
+Preferences:
 Genre: pop
 Mood: happy
-Target Energy: 0.8
+Target Energy: 0.9
 Target Valence: 0.9
-Target Tempo: 120 BPM
+Target Tempo: 125 BPM
 
-Top Recommendations:
+Top 5 Recommendations:
 
 1. Sunrise City
-Score: 5.89
+Score: 5.74
 Reasons:
 - genre match (+2.0)
 - mood match (+1.0)
-- energy close to target (+0.98)
+- energy close to target (+0.92)
 - valence close to target (+0.94)
-- tempo close to target (+0.97)
+- tempo close to target (+0.88)
 
 2. Gym Hero
-Score: 4.54
+Score: 4.72
 Reasons:
 - genre match (+2.0)
-- energy close to target (+0.87)
+- energy close to target (+0.97)
 - valence close to target (+0.87)
-- tempo close to target (+0.80)
+- tempo close to target (+0.88)
 
 3. Rooftop Lights
-Score: 3.80
+Score: 3.75
 Reasons:
 - mood match (+1.0)
-- energy close to target (+0.96)
+- energy close to target (+0.86)
 - valence close to target (+0.91)
-- tempo close to target (+0.93)
+- tempo close to target (+0.98)
 
 4. Neon Horizon
-Score: 2.57
+Score: 2.75
 Reasons:
-- energy close to target (+0.85)
+- energy close to target (+0.95)
 - valence close to target (+0.85)
-- tempo close to target (+0.87)
+- tempo close to target (+0.95)
 
 5. City Lights Flow
-Score: 2.38
+Score: 2.20
 Reasons:
-- energy close to target (+1.00)
+- energy close to target (+0.90)
 - valence close to target (+0.80)
-- tempo close to target (+0.58)
+- tempo close to target (+0.50)
 ```
 
 ---
