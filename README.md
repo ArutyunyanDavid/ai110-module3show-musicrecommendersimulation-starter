@@ -80,6 +80,18 @@ It also only works on a tiny catalog and does not understand lyrics or language.
 
 ---
 
+## Optional Features Added
+
+I added extra song features such as popularity, release decade, instrumentalness,
+detailed mood, and language (danceability and acousticness were already there). I also
+added multiple scoring modes (`balanced`, `genre_first`, `mood_first`, and
+`energy_focused`) so the recommender can rank songs in different ways using a simple
+Strategy pattern. A diversity penalty (that I can turn on or off) helps avoid
+recommending too many songs from the same artist or genre. Finally, the terminal output
+now shows recommendations in a cleaner table format with the reasons listed underneath.
+
+---
+
 ## Getting Started
 
 ### Setup

@@ -1,8 +1,11 @@
 """
 Command line runner for the Music Recommender Simulation.
 
-This file runs several user profiles so I can compare how the recommender
-behaves for different music tastes.
+This version shows off the optional challenge features:
+- extra song features (danceability, acousticness, popularity, decade, etc.)
+- multiple scoring modes (balanced / genre_first / mood_first / energy_focused)
+- an optional diversity penalty
+- a clean table-style output (built with plain Python, no extra libraries)
 
 Run it from the project root with:
     python -m src.main
@@ -12,9 +15,7 @@ from src.recommender import load_songs, recommend_songs
 
 
 # ---------------------------------------------------------------------------
-# User profiles to test.
-# The first three are "normal" tastes. The last two are tricky "edge case"
-# profiles that ask for unusual or conflicting things.
+# User profiles. These now include the new preference keys too.
 # ---------------------------------------------------------------------------
 high_energy_pop = {
     "name": "High-Energy Pop",
@@ -23,86 +24,95 @@ high_energy_pop = {
     "target_energy": 0.9,
     "target_valence": 0.9,
     "target_tempo_bpm": 125,
+    "target_danceability": 0.85,
+    "target_acousticness": 0.1,
+    "target_popularity": 75,
+    "preferred_decade": 2020,
+    "preferred_detailed_mood": "hype",
 }
 
 chill_lofi = {
     "name": "Chill Lofi",
     "favorite_genre": "lofi",
-    "favorite_mood": "calm",
+    "favorite_mood": "chill",
     "target_energy": 0.3,
-    "target_valence": 0.5,
-    "target_tempo_bpm": 80,
+    "target_valence": 0.55,
+    "target_tempo_bpm": 78,
+    "target_danceability": 0.55,
+    "target_acousticness": 0.8,
+    "target_popularity": 50,
+    "preferred_decade": 2020,
+    "preferred_detailed_mood": "focused",
 }
 
-deep_intense_rock = {
-    "name": "Deep Intense Rock",
-    "favorite_genre": "rock",
-    "favorite_mood": "intense",
-    "target_energy": 0.9,
-    "target_valence": 0.4,
-    "target_tempo_bpm": 140,
-}
 
-# Edge case 1: asks for two things that usually don't go together
-# (sad mood is usually low energy, but this user wants high energy).
-sad_but_high_energy = {
-    "name": "Sad But High Energy",
-    "favorite_genre": "pop",
-    "favorite_mood": "sad",
-    "target_energy": 0.9,
-    "target_valence": 0.2,
-    "target_tempo_bpm": 130,
-}
-
-# Edge case 2: a genre that barely exists in our small dataset.
-genre_mismatch_test = {
-    "name": "Genre Mismatch Test",
-    "favorite_genre": "classical",
-    "favorite_mood": "happy",
-    "target_energy": 0.8,
-    "target_valence": 0.9,
-    "target_tempo_bpm": 120,
-}
-
-PROFILES = [
-    high_energy_pop,
-    chill_lofi,
-    deep_intense_rock,
-    sad_but_high_energy,
-    genre_mismatch_test,
-]
-
-
-def print_profile_results(profile: dict, songs: list) -> None:
-    """Print one profile's preferences and its top 5 recommendations."""
-    print("=" * 40)
-    print(f"Profile: {profile['name']}")
-    print("Preferences:")
-    print(f"Genre: {profile['favorite_genre']}")
-    print(f"Mood: {profile['favorite_mood']}")
-    print(f"Target Energy: {profile['target_energy']}")
-    print(f"Target Valence: {profile['target_valence']}")
-    print(f"Target Tempo: {profile['target_tempo_bpm']} BPM")
-    print()
-    print("Top 5 Recommendations:\n")
-
-    recommendations = recommend_songs(profile, songs, k=5)
-    for position, rec in enumerate(recommendations, start=1):
+def print_table(recommendations: list) -> None:
+    """Print the recommendations as a simple text table, then the reasons."""
+    headers = ["Rank", "Title", "Artist", "Genre", "Mood", "Score"]
+    rows = []
+    for rank, rec in enumerate(recommendations, start=1):
         song = rec["song"]
-        print(f"{position}. {song['title']}")
-        print(f"Score: {rec['score']:.2f}")
-        print("Reasons:")
-        for reason in rec["reasons"]:
-            print(f"- {reason}")
-        print()
+        rows.append([
+            str(rank),
+            song["title"],
+            song["artist"],
+            song["genre"],
+            song["mood"],
+            f"{rec['score']:.2f}",
+        ])
+
+    # Find the widest cell in each column so the columns line up.
+    widths = [len(h) for h in headers]
+    for row in rows:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(cell))
+
+    def format_row(cells: list) -> str:
+        return " | ".join(cell.ljust(widths[i]) for i, cell in enumerate(cells))
+
+    # Header, a divider line, then every row.
+    print(format_row(headers))
+    print("-+-".join("-" * w for w in widths))
+    for row in rows:
+        print(format_row(row))
+
+    # Reasons are usually too long for a table cell, so we list them below.
+    print("\nReasons:")
+    for rank, rec in enumerate(recommendations, start=1):
+        print(f"{rank}. {rec['song']['title']}")
+        if rec["reasons"]:
+            for reason in rec["reasons"]:
+                print(f"   - {reason}")
+        else:
+            print("   - (no strong matches)")
+
+
+def run_demo(profile: dict, songs: list, mode: str, use_diversity: bool) -> None:
+    """Run one recommendation demo and print it clearly."""
+    print("=" * 60)
+    print(f"Profile: {profile['name']}")
+    print(f"Scoring Mode: {mode}")
+    print(f"Diversity: {'on' if use_diversity else 'off'}")
+    print()
+
+    recommendations = recommend_songs(
+        profile, songs, k=5, mode=mode, use_diversity=use_diversity
+    )
+    print_table(recommendations)
+    print()
 
 
 def main() -> None:
     songs = load_songs("data/songs.csv")
     print(f"Loaded songs: {len(songs)}\n")
 
-    for profile in PROFILES:
-        print_profile_results(profile, songs)
+    # Demo 1: energy-focused mode for a high-energy listener.
+    run_demo(high_energy_pop, songs, mode="energy_focused", use_diversity=False)
+
+    # Demo 2 and 3: same profile and mode, WITHOUT then WITH diversity, so I can
+    # see how the diversity penalty changes the list.
+    run_demo(chill_lofi, songs, mode="genre_first", use_diversity=False)
+    run_demo(chill_lofi, songs, mode="genre_first", use_diversity=True)
 
 
 if __name__ == "__main__":
