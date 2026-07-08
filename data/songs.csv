@@ -9,3 +9,11 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
 9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
 10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,City Lights Flow,MC Vero,hip hop,confident,0.80,95,0.70,0.85,0.08
+12,Winter Nocturne,Elena Frost,classical,melancholy,0.15,52,0.30,0.10,0.98
+13,Neon Horizon,Pulse Theory,edm,energetic,0.95,128,0.75,0.90,0.03
+14,Velvet Hours,Mara Soul,r&b,romantic,0.50,96,0.68,0.66,0.40
+15,Iron Verdict,Ashfall,metal,angry,0.98,168,0.35,0.45,0.02
+16,Old Porch Song,Hollow Pines,folk,nostalgic,0.30,84,0.55,0.40,0.90
+17,Island Time,Sun Riddim,reggae,relaxed,0.48,74,0.78,0.70,0.55
+18,Breakpoint,Circuit Fox,drum and bass,hype,0.92,174,0.60,0.80,0.04

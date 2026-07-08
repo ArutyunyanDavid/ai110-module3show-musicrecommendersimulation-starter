@@ -17,17 +17,66 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+### How real music apps do it
 
-Some prompts to answer:
+Real music apps like Spotify and YouTube look at a huge amount of data about what
+people do — what they play, like, skip, and add to playlists. They use two main ideas.
+The first is **collaborative filtering**, which finds people with similar taste and
+suggests songs those people liked. The second is **content-based filtering**, which
+looks at the features of songs you already like and finds new songs that feel similar.
+Big apps usually mix both to get better results.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+### How my simple version works
 
-You can include a simple diagram or bullet list if helpful.
+My version is much smaller. It only uses **content-based filtering**. It takes a user's
+taste profile and gives every song a score based on how well the song matches. It cares
+most about matching the user's favorite genre, then mood, then how close the song's
+energy, valence, and tempo are to what the user wants. After scoring every song, it
+ranks them from best to worst and shows the top few. It does not know about other
+users, lyrics, or listening history — just the song features in my data file.
+
+### My Algorithm Recipe
+
+Each song starts at 0 points, then earns points like this:
+
+```
+score(song) =
+      2.0  if the song genre matches the user's favorite genre
+    + 1.0  if the song mood matches the user's favorite mood
+    + 1.0 * (1 - |song energy  - target energy|)
+    + 1.0 * (1 - |song valence - target valence|)
+    + 1.0 * (1 - |song tempo   - target tempo| / 60)   (never below 0)
+```
+
+Genre is worth the most because it is the biggest part of someone's taste. The number
+features (energy, valence, tempo) give more points the **closer** the song is to what
+the user wants, not just for being higher. After every song has a score, I **sort** them
+from highest to lowest and show the top results.
+
+### Features my `Song` object uses
+
+- `genre` (pop, lofi, rock, hip hop, etc.)
+- `mood` (happy, chill, intense, etc.)
+- `energy` (0 to 1)
+- `valence` (how happy the song sounds, 0 to 1)
+- `tempo_bpm` (how fast the beat is)
+- `acousticness` (how acoustic it is, 0 to 1)
+- (plus `id`, `title`, and `artist` which are just labels)
+
+### Features my `UserProfile` object uses
+
+- `favorite_genre` (the genre the user likes most)
+- `favorite_mood` (the mood the user likes most)
+- `target_energy` (how much energy they want, 0 to 1)
+- `target_valence` (how happy they want the song, 0 to 1)
+- `target_tempo` (the beat speed they want, in bpm)
+
+### Possible bias or weakness
+
+This system might **over-prioritize genre**, so it could miss songs that match the
+user's mood or energy but are from a different genre. For example, a chill, low-energy
+song a user would love could get skipped just because it is labeled a different genre.
+It also only works on a tiny catalog and does not understand lyrics or language.
 
 ---
 
