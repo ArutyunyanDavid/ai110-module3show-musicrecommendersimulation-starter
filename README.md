@@ -117,18 +117,59 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+This is the real terminal output from running `python -m src.main`:
 
-```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
-```
+```text
+Loaded songs: 18
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+User Profile:
+Genre: pop
+Mood: happy
+Target Energy: 0.8
+Target Valence: 0.9
+Target Tempo: 120 BPM
+
+Top Recommendations:
+
+1. Sunrise City
+Score: 5.89
+Reasons:
+- genre match (+2.0)
+- mood match (+1.0)
+- energy close to target (+0.98)
+- valence close to target (+0.94)
+- tempo close to target (+0.97)
+
+2. Gym Hero
+Score: 4.54
+Reasons:
+- genre match (+2.0)
+- energy close to target (+0.87)
+- valence close to target (+0.87)
+- tempo close to target (+0.80)
+
+3. Rooftop Lights
+Score: 3.80
+Reasons:
+- mood match (+1.0)
+- energy close to target (+0.96)
+- valence close to target (+0.91)
+- tempo close to target (+0.93)
+
+4. Neon Horizon
+Score: 2.57
+Reasons:
+- energy close to target (+0.85)
+- valence close to target (+0.85)
+- tempo close to target (+0.87)
+
+5. City Lights Flow
+Score: 2.38
+Reasons:
+- energy close to target (+1.00)
+- valence close to target (+0.80)
+- tempo close to target (+0.58)
+```
 
 ---
 
