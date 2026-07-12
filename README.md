@@ -2,16 +2,13 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+This project is a small music recommender that I built for class. It reads a list of
+songs from a CSV file and compares each song to a user's taste profile (their favorite
+genre, mood, and target energy, valence, and tempo). It gives every song a score, ranks
+them from best match to worst, and shows the top few with reasons for why each song was
+picked. It uses content-based filtering, which means it recommends songs based on the
+song's own features, not on what other users liked. I also added some optional features
+like extra song attributes, different scoring modes, and a diversity penalty.
 
 ---
 
@@ -52,6 +49,20 @@ Genre is worth the most because it is the biggest part of someone's taste. The n
 features (energy, valence, tempo) give more points the **closer** the song is to what
 the user wants, not just for being higher. After every song has a score, I **sort** them
 from highest to lowest and show the top results.
+
+### Data Flow
+
+```text
+Input:  User preferences (genre, mood, energy, valence, tempo)
+   |
+Process: Loop through every song in songs.csv
+   |
+Score:  Give each song points using the Algorithm Recipe
+   |
+Rank:   Sort songs from highest score to lowest score
+   |
+Output: Show the top recommendations (with reasons)
+```
 
 ### Features my `Song` object uses
 
@@ -129,100 +140,100 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Running `python -m src.main` now prints the top 5 recommendations for **five
-different user profiles**. Below is the first profile as an example — the full
-output for all five profiles is in [model_card.md](model_card.md).
+Running `python -m src.main` prints a few demos in a table format: one using the
+`energy_focused` scoring mode, and one profile shown with the diversity penalty off and
+then on. Below is the first demo as an example. (Full evaluation output for five
+profiles is in [model_card.md](model_card.md).)
 
 ```text
 Loaded songs: 18
 
-========================================
+============================================================
 Profile: High-Energy Pop
-Preferences:
-Genre: pop
-Mood: happy
-Target Energy: 0.9
-Target Valence: 0.9
-Target Tempo: 125 BPM
+Scoring Mode: energy_focused
+Diversity: off
 
-Top 5 Recommendations:
+Rank | Title            | Artist        | Genre     | Mood      | Score
+-----+------------------+---------------+-----------+-----------+------
+1    | Gym Hero         | Max Pulse     | pop       | intense   | 10.03
+2    | Sunrise City     | Neon Echo     | pop       | happy     | 9.84
+3    | Neon Horizon     | Pulse Theory  | edm       | energetic | 8.54
+4    | Rooftop Lights   | Indigo Parade | indie pop | happy     | 8.29
+5    | City Lights Flow | MC Vero       | hip hop   | confident | 8.09
 
-1. Sunrise City
-Score: 5.74
 Reasons:
-- genre match (+2.0)
-- mood match (+1.0)
-- energy close to target (+0.92)
-- valence close to target (+0.94)
-- tempo close to target (+0.88)
-
-2. Gym Hero
-Score: 4.72
-Reasons:
-- genre match (+2.0)
-- energy close to target (+0.97)
-- valence close to target (+0.87)
-- tempo close to target (+0.88)
-
-3. Rooftop Lights
-Score: 3.75
-Reasons:
-- mood match (+1.0)
-- energy close to target (+0.86)
-- valence close to target (+0.91)
-- tempo close to target (+0.98)
-
-4. Neon Horizon
-Score: 2.75
-Reasons:
-- energy close to target (+0.95)
-- valence close to target (+0.85)
-- tempo close to target (+0.95)
-
-5. City Lights Flow
-Score: 2.20
-Reasons:
-- energy close to target (+0.90)
-- valence close to target (+0.80)
-- tempo close to target (+0.50)
+1. Gym Hero
+   - genre match (+1.0)
+   - detailed mood match (+0.5)
+   - decade match (+0.5)
+   - energy close to target (+2.91)
+   - valence close to target (+0.43)
+   - tempo close to target (+1.77)
+   - danceability close to target (+1.94)
+   - acousticness close to target (+0.47)
+   - popular enough (+0.50)
+2. Sunrise City
+   - genre match (+1.0)
+   - mood match (+0.5)
+   - decade match (+0.5)
+   - energy close to target (+2.76)
+   - valence close to target (+0.47)
+   - tempo close to target (+1.77)
+   - danceability close to target (+1.88)
+   - acousticness close to target (+0.46)
+   - popular enough (+0.50)
 ```
+
+Note: scores in `energy_focused` mode can go above 5 because that mode stacks several
+high weights (energy, tempo, and danceability). Scores are only meant to be compared
+within the same scoring mode.
 
 ---
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
-
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+- **Weight shift experiment:** I changed genre from +2.0 down to +1.0 and energy from
+  up to +1.0 up to +2.0. The #1 song for each profile stayed the same, but lower ranks
+  started favoring high-energy songs from other genres (a rock song even jumped into the
+  pop list). This showed me energy became stronger and genre became weaker.
+- **Different user types:** I tested High-Energy Pop, Chill Lofi, Deep Intense Rock, and
+  two edge cases (Sad But High Energy, Genre Mismatch Test). Each profile got songs that
+  mostly matched its vibe. Full results are in [model_card.md](model_card.md).
+- **Scoring modes:** I compared `genre_first` and `energy_focused`. In `genre_first`,
+  lofi songs swept the top because a genre match is worth +4.0. In `energy_focused`,
+  high-energy songs took over.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
+- It only works on a tiny catalog (18 songs), so there is not much variety.
+- It does not understand lyrics or language, just the numbers and labels in the data.
+- It can over-favor genre, so it might miss a song from a different genre that matches
+  the user's mood and energy really well.
+- The same song can show up for many profiles (like "Gym Hero" for high-energy tastes).
+- It does not use real user behavior like likes, skips, saves, or playlists.
 
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+I go deeper on these in the [model card](model_card.md).
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
+Working on this project taught me that a recommender does not magically know what
+someone likes. It needs data, rules, and a way to compare each song to a user profile.
+I learned that turning data into predictions is really just giving each song a score
+from simple rules and then sorting the scores. It was cool to see that a simple scoring
+system could still feel like a real recommendation when the top songs matched the user's
+vibe.
 
-[**Model Card**](model_card.md)
+I also saw where bias can show up. Because genre is worth the most points, the system
+can get stuck recommending one genre and create a small filter bubble. And because my
+data is small and missing some moods (like there is no "sad" song), the system does
+badly for those tastes. A real app would need way more data and would need to be careful
+that it does not unfairly ignore certain artists, genres, or listeners.
 
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+See the full model card here: [**Model Card**](model_card.md)
 
 
 

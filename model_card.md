@@ -69,7 +69,10 @@ song fell out of the "Genre Mismatch Test" top 5. This showed me that small chan
 in the weights can change the rankings, and that energy became stronger while genre
 became weaker. I then set the weights back to the baseline.
 
-Here are the real terminal outputs from `python -m src.main` (baseline weights).
+Here are the real terminal outputs from the evaluation phase (the `balanced` /
+baseline weights). Note: I later added a table format and scoring modes as optional
+features, so the current `python -m src.main` prints these same scores in a table using
+different demo modes. The scores below are the balanced-mode results I evaluated.
 
 ### High-Energy Pop Output
 
